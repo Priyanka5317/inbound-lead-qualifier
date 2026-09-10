@@ -1,6 +1,10 @@
 # Inbound Lead Qualifier
 
-An agentic inbound lead qualifier that reads a new enquiry, decides whether it is worth a salesperson's time, and refuses to guess when the evidence is thin.
+An inbound lead qualifier that reads a new enquiry, decides whether it is worth a salesperson's time, and refuses to guess when the evidence is thin.
+
+**The scoring is deliberately not a model.** A rubric you can diff, test and explain to the salesperson who disagrees with it beats a model you cannot. The rubric is a JSON file, it was written before any prompt existed, and it is versioned with every change tied to the lead that exposed the defect.
+
+**The agent is in the layer where choice actually helps:** deciding which data sources to query for a given company, and when to stop.
 
 Repo: https://github.com/Priyanka5317/inbound-lead-qualifier
 
@@ -108,6 +112,47 @@ The scoring rubric exists twice, as `rubric.json` for Python and as JavaScript i
 node tests/parity_check.mjs
 # PARITY OK: n8n and Python agree on all 20 golden leads.
 ```
+
+---
+
+## The agent, and whether it earns its place
+
+Enrichment has four sources. The fixed policy queries all four, every time,
+in a hardcoded order. Measured over five domains, that is:
+
+```
+FIXED   mean coverage 0.32   20 calls   11 wasted (55%)
+```
+
+**More than half of its calls return nothing new**, and a domain with nothing
+behind it burns all four. That is the headroom.
+
+So `src/enrich_agent.py` hands the model those four sources as tools and lets
+it choose: which to call, in what order, and when to give up. Real
+model-driven control, a real loop, tool schemas generated from the function
+signatures.
+
+```bash
+python src/enrich_agent.py --schemas      # tool schemas, no API call
+python src/enrich_agent.py stripe.com     # needs a key
+python src/agent_eval.py                  # fixed vs agent
+```
+
+The tool descriptions carry the actual tradeoffs rather than restating the
+function name, because that is the only thing the model has to plan with:
+Wikidata is the only source that returns headcount but is slow and misses
+private companies; MX lookup is fast but can only ever add to `tech_stack`;
+the homepage is the cheapest way to learn whether the domain resolves at all.
+
+**The agent is allowed to lose.** `agent_eval.py` scores both policies on
+coverage, calls spent, and wasted calls. If the agent matches the fixed
+policy at the same cost it has bought nothing, and the honest conclusion is
+to delete it and keep the waterfall. That verdict is written into the eval as
+one of its printed outcomes.
+
+The fixed baseline above needs no credentials and runs today. The agent half
+needs a key, and until it has one the eval prints it as **pending rather than
+skipped**, because an unrun comparison is not the same as a favourable one.
 
 ---
 
@@ -272,6 +317,8 @@ src/compare.py               rubric A/B across golden and held-out sets
 src/redteam.py               adversarial attacks on the validation gate
 src/report.py                generates the self-contained HTML report
 src/providers.py             step 2 as used, offline + live four-source waterfall
+src/enrich_agent.py          the agent: four sources as tools, model picks
+src/agent_eval.py            fixed policy vs agent, coverage against cost
 src/llm_drafter.py           the real claude-opus-5 call, structured output
 tests/run_workflow.mjs       executes the exported n8n graph, both branches
 n8n/inbound-lead-qualifier.json   the 5 node workflow, importable
