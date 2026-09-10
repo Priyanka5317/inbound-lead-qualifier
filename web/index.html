@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inbound Lead Qualifier, live demo</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-0:#f6f5f2; --surface-1:#fcfcfb; --surface-2:#eeece7;
+    --border:#e3e1db; --text-primary:#0b0b0b; --text-secondary:#52514e;
+    --text-muted:#77756e; --series-1:#2a78d6; --series-2:#eb6834;
+    --good:#0ca30c; --critical:#d03b3b; --warning:#fab219;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-0:#111110; --surface-1:#1a1a19; --surface-2:#232320;
+      --border:#33322f; --text-primary:#fff; --text-secondary:#c3c2b7;
+      --text-muted:#8e8d85; --series-1:#3987e5; --series-2:#d95926;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-0:#111110; --surface-1:#1a1a19; --surface-2:#232320;
+    --border:#33322f; --text-primary:#fff; --text-secondary:#c3c2b7;
+    --text-muted:#8e8d85; --series-1:#3987e5; --series-2:#d95926;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--surface-0);color:var(--text-primary);
+    font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-variant-ligatures:none}
+  .wrap{max-width:1000px;margin:0 auto;padding:38px 22px 90px}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+  h2{font-size:19px;margin:40px 0 4px;letter-spacing:-.01em}
+  p{margin:0 0 12px;color:var(--text-secondary)}
+  .lede{font-size:17px;color:var(--text-secondary)}
+  .meta{font-size:13px;color:var(--text-muted);margin-bottom:6px}
+  a{color:var(--series-1)}
+  .card{background:var(--surface-1);border:1px solid var(--border);
+    border-radius:10px;padding:18px 20px;margin:14px 0}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.row{grid-template-columns:1fr}}
+  label{display:block;font-size:12px;color:var(--text-muted);
+    text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}
+  select,input,textarea{width:100%;padding:8px 10px;border-radius:7px;
+    border:1px solid var(--border);background:var(--surface-0);
+    color:var(--text-primary);font:14px/1.5 inherit}
+  textarea{min-height:76px;resize:vertical}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:760px){.grid4{grid-template-columns:repeat(2,1fr)}}
+  .badge{display:inline-block;padding:5px 13px;border-radius:99px;
+    font-size:13px;font-weight:650}
+  .b-call{background:color-mix(in srgb,var(--good) 17%,transparent);color:var(--good)}
+  .b-nurture{background:color-mix(in srgb,var(--series-1) 17%,transparent);color:var(--series-1)}
+  .b-dq{background:var(--surface-2);color:var(--text-secondary)}
+  .b-abstain{background:color-mix(in srgb,var(--warning) 26%,transparent);color:var(--text-primary)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--text-muted);border-bottom:1px solid var(--border);padding:6px 7px}
+  td{padding:6px 7px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+  td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .met{color:var(--good);font-weight:600}
+  .notmet{color:var(--text-muted)}
+  .miss{color:var(--warning);font-weight:600}
+  .why{font-size:13px;color:var(--text-secondary);margin-top:10px;
+    padding:10px 12px;background:var(--surface-0);border-radius:7px;
+    border-left:3px solid var(--series-1)}
+  code{font:12px ui-monospace,Menlo,monospace;background:var(--surface-0);
+    border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+  button{cursor:pointer;font:13px inherit;padding:7px 13px;border-radius:7px;
+    border:1px solid var(--border);background:var(--surface-2);
+    color:var(--text-primary)}
+  button:hover{border-color:var(--series-1)}
+  button.primary{background:var(--series-1);color:#fff;border-color:transparent;
+    font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+  .chips button{font-size:12px;padding:5px 10px}
+  .verdict{padding:13px 15px;border-radius:8px;margin-top:12px;font-size:14px}
+  .v-pass{background:color-mix(in srgb,var(--good) 12%,transparent);
+    border-left:3px solid var(--good)}
+  .v-block{background:color-mix(in srgb,var(--critical) 12%,transparent);
+    border-left:3px solid var(--critical)}
+  .v-hole{background:color-mix(in srgb,var(--warning) 16%,transparent);
+    border-left:3px solid var(--warning)}
+  .toggle{position:fixed;top:13px;right:15px;font-size:12px;padding:6px 12px;
+    border-radius:99px;border:1px solid var(--border);background:var(--surface-1);
+    color:var(--text-secondary);cursor:pointer;z-index:9}
+  .sub{font-size:12px;color:var(--text-muted)}
+  .kv{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;
+    color:var(--text-secondary)}
+  .kv b{color:var(--text-primary);font-weight:600}
+</style></head>
+<body class="viz-root">
+<button class="toggle" onclick="var r=document.documentElement;
+  r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">theme</button>
+<div class="wrap">
+
+<h1>Inbound Lead Qualifier</h1>
+<p class="lede">A GTM system that reads an inbound enquiry, decides whether it
+is worth a salesperson's time, and refuses to guess when the evidence is thin.</p>
+<p class="meta">Running entirely in your browser. No server, no key, nothing to
+install. The scoring below is the same code the test suite runs.
+<a href="https://github.com/Priyanka5317/inbound-lead-qualifier">Source</a></p>
+
+<h2>1. Qualify a lead</h2>
+<p>Pick an enquiry, or change the numbers and watch the decision move. Both
+rubric versions score it at once, so you can see what the second one fixed.</p>
+
+<div class="card">
+  <div class="row">
+    <div>
+      <label for="lead">Inbound enquiry</label>
+      <select id="lead"></select>
+      <div class="grid4" style="margin-top:12px">
+        <div><label for="demo">Demo?</label>
+          <select id="demo"><option value="true">yes</option>
+          <option value="false">no</option><option value="">not answered</option></select></div>
+        <div><label for="pricing">Pricing visits</label>
+          <input id="pricing" type="number" min="0" max="20"></div>
+        <div><label for="emails">Emails opened</label>
+          <input id="emails" type="number" min="0" max="20"></div>
+        <div><label for="emp">Headcount</label>
+          <input id="emp" type="number" min="0" max="99999" placeholder="unknown"></div>
+      </div>
+      <div id="company" style="margin-top:12px"></div>
+    </div>
+    <div>
+      <label>Decision</label>
+      <div id="decision"></div>
+    </div>
+  </div>
+  <div style="margin-top:16px"><label>How it scored, rubric v2</label>
+    <table><thead><tr><th>Criterion</th><th class="n">Awarded</th><th>Verdict</th></tr></thead>
+    <tbody id="breakdown"></tbody></table>
+  </div>
+</div>
+
+<h2>2. Try to get a lie past the gate</h2>
+<p>Every outbound sentence must name the enrichment field it rests on, and the
+gate checks that claim independently. <b>Write a sentence about Northwind
+Health and try to sneak something past it.</b> The record it checks against is
+below the box.</p>
+
+<div class="card">
+  <div class="chips" id="attacks"></div>
+  <label for="claim">Your sentence</label>
+  <textarea id="claim">Congratulations on the Series B, raising $40M is no small thing.</textarea>
+  <div class="row" style="margin-top:10px">
+    <div><label for="support">Field it rests on</label>
+      <select id="support"></select></div>
+    <div style="display:flex;align-items:flex-end">
+      <button class="primary" id="check" style="width:100%">Check it</button></div>
+  </div>
+  <div id="gate"></div>
+  <div style="margin-top:14px"><label>The record it is checked against</label>
+    <div id="record" class="sub"></div></div>
+</div>
+
+<h2>3. What the agent is for</h2>
+<p>Enrichment has four sources. The old policy called all four, every time.
+Measured over five real domains that is <b>20 calls with 11 of them wasted</b>,
+and a dead domain burns all four. So the model gets those sources as tools and
+picks. The evaluation is written so the agent can lose: if it matches the fixed
+policy at the same cost, the printed verdict says to delete it.</p>
+<div class="card">
+  <div class="kv"><span>fixed policy, mean coverage</span><b>0.32</b></div>
+  <div class="kv"><span>fixed policy, calls spent</span><b>20</b></div>
+  <div class="kv"><span>of those, returned nothing new</span><b>11</b></div>
+  <div class="kv"><span>agent</span><b>needs an API key, reported pending</b></div>
+  <p class="sub" style="margin-top:10px">An unrun comparison is not the same as
+  a favourable one, so it is reported as pending rather than quietly skipped.</p>
+</div>
+
+</div>
+
+<script>
+/**
+ * The rubric scorer and the validation gate, in JavaScript.
+ *
+ * This is the THIRD implementation of the same rules. Python runs the
+ * evaluation, the n8n Code node runs them in a workflow, and this runs them
+ * in a browser with no server. Three copies is a real maintenance cost and
+ * the only honest way to hold it is a test: `tests/parity_check.mjs` scores
+ * all twenty golden leads through every implementation and fails if any two
+ * disagree.
+ *
+ * Loaded as an ES module by web/index.html and imported by the parity test,
+ * so the browser demo and the test are provably running the same code.
+ */
+
+const MISSING = (v) => v === null || v === undefined
+  || (typeof v === 'string' && v.trim() === '');
+
+/** Three-state industry match. True in ICP, false outside it, null unknown. */
+function taxonomy(criterion, value) {
+  if (typeof value !== 'string') return null;
+  const text = value.toLowerCase().trim();
+
+  for (const c of criterion.canonical) if (text.includes(c)) return true;
+  for (const [phrase, canonical] of Object.entries(criterion.synonyms || {})) {
+    if (text.includes(phrase)) return criterion.canonical.includes(canonical);
+  }
+  for (const out of criterion.known_outside_icp || []) {
+    if (text.includes(out)) return false;
+  }
+  return criterion.unrecognised_is_missing ? null : false;
+}
+
+function evaluate(criterion, value) {
+  switch (criterion.test) {
+    case 'between':
+      return typeof value === 'number'
+        && value >= criterion.min && value <= criterion.max;
+    case 'keyword_any':
+      return typeof value === 'string'
+        && criterion.keywords.some((k) => value.toLowerCase().includes(k));
+    case 'list_contains_any': {
+      if (!Array.isArray(value)) return false;
+      const blob = value.join(' ').toLowerCase();
+      return criterion.keywords.some((k) => blob.includes(k));
+    }
+    case 'in_set': return criterion.values.includes(value);
+    case 'is_true': return value === true;
+    case 'gte': return typeof value === 'number' && value >= criterion.value;
+    case 'taxonomy': return taxonomy(criterion, value);
+    default: throw new Error(`unknown test: ${criterion.test}`);
+  }
+}
+
+/** Score facts against a rubric. Mirrors src/qualify.py exactly. */
+function qualify(facts, rubric) {
+  const abstainAt = rubric.routing.abstain_rule.points;
+  const breakdown = [];
+  const blocking = [];
+  let score = 0;
+
+  for (const section of ['fit', 'intent']) {
+    for (const criterion of rubric[section].criteria) {
+      const value = facts[criterion.field];
+      let missing = MISSING(value);
+      let awarded = 0;
+
+      // A taxonomy test can report "present but unrecognised", a third
+      // outcome the two-state check could not express.
+      if (!missing && criterion.test === 'taxonomy'
+          && taxonomy(criterion, value) === null) missing = true;
+
+      let verdict;
+      if (missing) {
+        if (criterion.points >= abstainAt) blocking.push(criterion.field);
+        verdict = !MISSING(value) ? 'unrecognised' : 'missing';
+      } else {
+        const met = evaluate(criterion, value);
+        awarded = met ? criterion.points : 0;
+        verdict = met ? 'met' : 'not met';
+      }
+      score += awarded;
+      breakdown.push({
+        section, id: criterion.id, label: criterion.label,
+        field: criterion.field, value, verdict,
+        awarded, available: criterion.points,
+      });
+    }
+  }
+
+  const fitScore = breakdown.filter((b) => b.section === 'fit')
+    .reduce((a, b) => a + b.awarded, 0);
+  const intentScore = breakdown.filter((b) => b.section === 'intent')
+    .reduce((a, b) => a + b.awarded, 0);
+
+  const out = {
+    score, fit_score: fitScore, intent_score: intentScore, breakdown,
+    abstained: blocking.length > 0, missing_blocking_fields: blocking,
+  };
+
+  if (blocking.length) {
+    out.reason = `insufficient evidence: ${blocking.join(', ')} unresolved `
+      + `and each is worth ${abstainAt}+ points`;
+  } else {
+    const won = breakdown.filter((b) => b.awarded > 0).map((b) => b.label);
+    const lost = breakdown.filter((b) => b.verdict === 'not met').map((b) => b.label);
+    out.reason = `fit ${fitScore}/${rubric.fit.max}, intent ${intentScore}/`
+      + `${rubric.intent.max}. `
+      + (won.length ? `Met: ${won.join('; ')}. ` : '')
+      + (lost.length ? `Missed: ${lost.join('; ')}.` : '');
+    out.reason = out.reason.trim();
+  }
+  return out;
+}
+
+const DESTINATION = {
+  'book a call': 'sales_queue',
+  nurture: 'nurture_sequence',
+  disqualify: 'closed_lost',
+  abstain: 'needs_human',
+};
+
+/** Route a scored lead. Mirrors src/route.py, fit floor included. */
+function route(qualification, rubric) {
+  if (qualification.abstained) {
+    return {
+      route: 'abstain', destination: DESTINATION.abstain,
+      score: qualification.score, fit_score: qualification.fit_score,
+      fit_floor_applied: false, explanation: qualification.reason,
+    };
+  }
+
+  const t = rubric.routing;
+  const floor = t.minimum_fit_to_book;
+  const fitBlocked = floor !== undefined && qualification.fit_score < floor;
+
+  let decision;
+  if (qualification.score >= t.book_a_call_at_or_above && !fitBlocked) {
+    decision = 'book a call';
+  } else if (qualification.score >= t.book_a_call_at_or_above && fitBlocked) {
+    decision = 'nurture';
+  } else if (qualification.score >= t.nurture_at_or_above) {
+    decision = 'nurture';
+  } else {
+    decision = 'disqualify';
+  }
+
+  let explanation = qualification.reason;
+  if (fitBlocked && qualification.score >= t.book_a_call_at_or_above) {
+    explanation = `scored ${qualification.score} but fit is only `
+      + `${qualification.fit_score}, below the floor of ${floor}. Intent alone `
+      + `does not promote to a call, so this drops to nurture. ${explanation}`;
+  }
+
+  return {
+    route: decision, destination: DESTINATION[decision],
+    score: qualification.score, fit_score: qualification.fit_score,
+    fit_floor_applied: Boolean(fitBlocked), explanation,
+  };
+}
+
+// --------------------------------------------------------- the gate
+
+const GENERIC_NUMBERS = new Set(['1', '2', '3', '5', '10', '15', '20', '30']);
+
+function recordNumbers(record) {
+  const found = new Set();
+  for (const v of Object.values(record)) {
+    if (typeof v === 'boolean') continue;
+    if (typeof v === 'number') found.add(String(Math.trunc(v)));
+    else if (typeof v === 'string') (v.match(/\d+/g) || []).forEach((n) => found.add(n));
+    else if (Array.isArray(v)) {
+      v.forEach((i) => (String(i).match(/\d+/g) || []).forEach((n) => found.add(n)));
+    }
+  }
+  return found;
+}
+
+function valueAppears(value, sentence) {
+  const low = sentence.toLowerCase();
+  if (typeof value === 'boolean') return true;
+  if (typeof value === 'number') {
+    return low.replace(/,/g, '').includes(String(Math.trunc(value)));
+  }
+  if (typeof value === 'string') {
+    const head = value.toLowerCase().split(/\s+/)[0] || value.toLowerCase();
+    return low.includes(head);
+  }
+  if (Array.isArray(value)) {
+    return value.some((v) => low.includes(String(v).toLowerCase()));
+  }
+  return false;
+}
+
+/** Enforce the citation contract. Mirrors src/draft.py validate(). */
+function validate(claims, record) {
+  const allowed = recordNumbers(record);
+  const kept = [];
+  const rejected = [];
+
+  for (const claim of claims) {
+    const { text } = claim;
+    const field = claim.support;
+
+    if (!field) {
+      rejected.push({ text, why: 'no supporting field declared' });
+      continue;
+    }
+    if (!(field in record)) {
+      rejected.push({ text, why: `cites unknown field '${field}'` });
+      continue;
+    }
+    if (record[field] === null || record[field] === undefined) {
+      rejected.push({ text, why: `cites unresolved field '${field}'` });
+      continue;
+    }
+    if (!valueAppears(record[field], text)) {
+      rejected.push({
+        text,
+        why: `does not reflect the value of '${field}' (${JSON.stringify(record[field])})`,
+      });
+      continue;
+    }
+    const stray = (text.match(/\d[\d,]*/g) || [])
+      .map((n) => n.replace(/,/g, ''))
+      .filter((n) => !allowed.has(n) && !GENERIC_NUMBERS.has(n));
+    if (stray.length) {
+      rejected.push({
+        text,
+        why: `unsupported number(s) ${JSON.stringify(stray)} not present in the record`,
+      });
+      continue;
+    }
+    kept.push(claim);
+  }
+
+  return {
+    kept,
+    rejected,
+    passed: rejected.length === 0,
+    claims_total: claims.length,
+    claims_rejected: rejected.length,
+  };
+}
+
+
+const V1 = {"_comment": "Written BEFORE any prompt. The prompt is an implementation of this file, not a replacement for it. Appendix B.2 of the bootcamp.", "version": "1.0.0", "authored": "2026-09-10", "fit": {"max": 60, "criteria": [{"id": "employee_count_in_band", "points": 20, "field": "employee_count", "test": "between", "min": 100, "max": 2000, "label": "Employee count 100 to 2000"}, {"id": "industry_in_icp", "points": 20, "field": "industry", "test": "keyword_any", "keywords": ["healthcare", "fintech", "saas"], "label": "Industry in [healthcare, fintech, SaaS]"}, {"id": "has_cloud_warehouse", "points": 10, "field": "tech_stack", "test": "list_contains_any", "keywords": ["snowflake", "bigquery", "redshift", "databricks", "synapse"], "label": "Tech stack includes a cloud warehouse"}, {"id": "sellable_country", "points": 10, "field": "hq_country", "test": "in_set", "values": ["United States", "Canada", "United Kingdom", "Germany", "Australia", "Netherlands", "Ireland", "Sweden"], "label": "Based in a country we sell to"}]}, "intent": {"max": 40, "criteria": [{"id": "requested_demo", "points": 25, "field": "requested_demo", "test": "is_true", "label": "Requested a demo"}, {"id": "pricing_page_repeat", "points": 10, "field": "pricing_page_visits", "test": "gte", "value": 2, "label": "Visited pricing page 2+ times"}, {"id": "email_engagement", "points": 5, "field": "emails_opened", "test": "gte", "value": 3, "label": "Opened 3+ emails"}]}, "routing": {"book_a_call_at_or_above": 70, "nurture_at_or_above": 40, "below_nurture": "disqualify", "abstain_rule": {"trigger": "any_missing_field_worth_at_least", "points": 20, "note": "Most scoring systems silently treat missing data as zero, which quietly disqualifies good leads whose data simply was not found. Handling it explicitly is the design decision worth defending in an interview."}}};
+const V2 = {"_comment": "v2. Every change below fixes a defect the v1 golden set actually exposed, and each is recorded with the lead that found it. Nothing here was changed on taste.", "version": "2.0.0", "authored": "2026-09-10", "parent": "1.0.0", "changelog": [{"found_by": "L-005", "defect": "A 220 person clinical operations company lost the entire 20 point industry block because the provider recorded its industry as 'Medical devices' and the rubric matched the literal keyword 'healthcare'. The lead was fine; the category label was not.", "rejected_fix": "Lower the booking threshold. That trades a taxonomy bug for a precision loss on every other lead.", "fix": "Normalise the provider's industry string through a synonym table before matching. Anything the table does not recognise at all is treated as MISSING rather than as a zero, which is the missing-data rule applied one level up.", "corroboration": "Reproduced independently on live data: Wikidata records Stripe as 'financial services', which the v1 keyword list also missed."}, {"found_by": "L-019", "defect": "A 2600 person hospital with no warehouse cleared the booking threshold on intent alone, scoring the full 40 and landing exactly on 70. Above the size band, no warehouse, so an implementation would stall.", "rejected_fix": "Reweight intent downward. That punishes genuinely interested leads that also fit.", "fix": "Fit and intent are not substitutes. Require a minimum fit score before intent can promote a lead to a call. Below the floor the lead can still reach nurture, so nothing is lost, it is only slowed."}], "fit": {"max": 60, "criteria": [{"id": "employee_count_in_band", "points": 20, "field": "employee_count", "test": "between", "min": 100, "max": 2000, "label": "Employee count 100 to 2000"}, {"id": "industry_in_icp", "points": 20, "field": "industry", "test": "taxonomy", "canonical": ["healthcare", "fintech", "saas"], "synonyms": {"medical devices": "healthcare", "clinical": "healthcare", "health": "healthcare", "hospital": "healthcare", "biotech": "healthcare", "life sciences": "healthcare", "pharma": "healthcare", "dental": "healthcare", "financial services": "fintech", "financial technology": "fintech", "payments": "fintech", "banking": "fintech", "lending": "fintech", "software": "saas", "cloud": "saas", "b2b software": "saas", "enterprise software": "saas", "data infrastructure": "saas"}, "known_outside_icp": ["logistics", "manufacturing", "insurance", "retail", "construction", "hospitality", "education", "agriculture", "mining", "energy", "real estate", "transportation", "media", "telecom", "automotive", "government", "legal", "nonprofit", "consulting"], "unrecognised_is_missing": true, "label": "Industry in [healthcare, fintech, SaaS] after synonym mapping"}, {"id": "has_cloud_warehouse", "points": 10, "field": "tech_stack", "test": "list_contains_any", "keywords": ["snowflake", "bigquery", "redshift", "databricks", "synapse"], "label": "Tech stack includes a cloud warehouse"}, {"id": "sellable_country", "points": 10, "field": "hq_country", "test": "in_set", "values": ["United States", "Canada", "United Kingdom", "Germany", "Australia", "Netherlands", "Ireland", "Sweden"], "label": "Based in a country we sell to"}]}, "intent": {"max": 40, "criteria": [{"id": "requested_demo", "points": 25, "field": "requested_demo", "test": "is_true", "label": "Requested a demo"}, {"id": "pricing_page_repeat", "points": 10, "field": "pricing_page_visits", "test": "gte", "value": 2, "label": "Visited pricing page 2+ times"}, {"id": "email_engagement", "points": 5, "field": "emails_opened", "test": "gte", "value": 3, "label": "Opened 3+ emails"}]}, "routing": {"book_a_call_at_or_above": 70, "nurture_at_or_above": 40, "below_nurture": "disqualify", "minimum_fit_to_book": 40, "minimum_fit_note": "Fit and intent are not substitutes. A lead below this fit score cannot be promoted to a call by intent alone; it falls back to nurture. Found by L-019.", "abstain_rule": {"trigger": "any_missing_field_worth_at_least", "points": 20, "note": "Missing data is not zero. As of v2 an industry the taxonomy does not recognise counts as missing too, rather than silently scoring zero."}}};
+const ENRICH = {"northwind-health.com": {"company_name": "Northwind Health", "employee_count": 340, "industry": "Healthcare software", "hq_country": "United States", "tech_stack": ["HubSpot", "Snowflake", "AWS"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.86}, "ledgerline.io": {"company_name": "Ledgerline", "employee_count": 145, "industry": "Fintech", "hq_country": "United States", "tech_stack": ["BigQuery", "Stripe"], "funding_stage": "Series A", "annual_revenue": null, "confidence": 0.81}, "brightpath-clinics.com": {"company_name": "Brightpath Clinics", "employee_count": 90, "industry": "Healthcare services", "hq_country": "United States", "tech_stack": ["HubSpot"], "funding_stage": "Bootstrapped", "annual_revenue": null, "confidence": 0.74}, "datastack-labs.com": {"company_name": "Datastack Labs", "employee_count": 1200, "industry": "SaaS", "hq_country": "United States", "tech_stack": ["Snowflake", "dbt", "AWS"], "funding_stage": "Series D", "annual_revenue": null, "confidence": 0.91}, "fieldstone-clinics.com": {"company_name": "Fieldstone Clinics", "employee_count": 220, "industry": "Medical devices", "hq_country": "United States", "tech_stack": ["Redshift"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.78}, "paylink-pay.com": {"company_name": "Paylink", "employee_count": null, "industry": "Fintech", "hq_country": "United States", "tech_stack": ["BigQuery"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.52}, "summit-logistics.com": {"company_name": "Summit Logistics", "employee_count": 5400, "industry": "Logistics", "hq_country": "United States", "tech_stack": ["SAP"], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.88}, "verdant-saas.io": {"company_name": "Verdant", "employee_count": 260, "industry": "SaaS", "hq_country": "Canada", "tech_stack": ["Databricks"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.83}, "oakmont-dental.com": {"company_name": "Oakmont Dental", "employee_count": 25, "industry": "Healthcare services", "hq_country": "United States", "tech_stack": [], "funding_stage": "Bootstrapped", "annual_revenue": null, "confidence": 0.69}, "cascade-fintech.com": {"company_name": "Cascade Fintech", "employee_count": 780, "industry": "Fintech", "hq_country": "United Kingdom", "tech_stack": ["Snowflake", "Looker"], "funding_stage": "Series C", "annual_revenue": null, "confidence": 0.9}, "nimbus-analytics.com": {"company_name": "Nimbus Analytics", "employee_count": 110, "industry": "SaaS", "hq_country": "United States", "tech_stack": ["Snowflake"], "funding_stage": "Series A", "annual_revenue": null, "confidence": 0.8}, "harborview-health.org": {"company_name": "Harborview Health", "employee_count": 1900, "industry": "Healthcare", "hq_country": "United States", "tech_stack": ["Azure Synapse"], "funding_stage": "Nonprofit", "annual_revenue": null, "confidence": 0.84}, "quantum-ledger.io": {"company_name": "Quantum Ledger", "employee_count": 60, "industry": "Fintech", "hq_country": "Singapore", "tech_stack": ["BigQuery"], "funding_stage": "Seed", "annual_revenue": null, "confidence": 0.71}, "stonebridge-insure.com": {"company_name": "Stonebridge Insurance", "employee_count": 3200, "industry": "Insurance", "hq_country": "United States", "tech_stack": ["Snowflake"], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.87}, "tinyseed-saas.com": {"company_name": "TinySeed", "employee_count": 12, "industry": "SaaS", "hq_country": "United States", "tech_stack": [], "funding_stage": "Pre-seed", "annual_revenue": null, "confidence": 0.63}, "meridian-care.com": {"company_name": "Meridian Care", "employee_count": 450, "industry": "Healthcare", "hq_country": "United States", "tech_stack": ["Snowflake", "HubSpot"], "funding_stage": "Series C", "annual_revenue": null, "confidence": 0.89}, "ironclad-mfg.com": {"company_name": "Ironclad Manufacturing", "employee_count": 900, "industry": "Manufacturing", "hq_country": "Germany", "tech_stack": [], "funding_stage": "Private", "annual_revenue": null, "confidence": 0.76}, "lumen-fintech.com": {"company_name": "Lumen Fintech", "employee_count": 320, "industry": "Fintech", "hq_country": "Australia", "tech_stack": ["Redshift"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.85}, "grandview-hospital.org": {"company_name": "Grandview Hospital", "employee_count": 2600, "industry": "Healthcare", "hq_country": "United States", "tech_stack": ["Epic"], "funding_stage": "Nonprofit", "annual_revenue": null, "confidence": 0.82}, "clearwater-labs.com": {"company_name": "Clearwater Labs", "employee_count": 175, "industry": "SaaS", "hq_country": "Netherlands", "tech_stack": ["BigQuery", "dbt"], "funding_stage": "Series A", "annual_revenue": null, "confidence": 0.86}, "solace-medical.com": {"company_name": "Solace Medical Devices", "employee_count": 300, "industry": "Medical devices", "hq_country": "United States", "tech_stack": ["Redshift"], "funding_stage": "Series C", "annual_revenue": null, "confidence": 0.83}, "northgate-pay.com": {"company_name": "Northgate Payments", "employee_count": 500, "industry": "Financial services", "hq_country": "United Kingdom", "tech_stack": ["BigQuery"], "funding_stage": "Series C", "annual_revenue": null, "confidence": 0.87}, "beacon-retail.com": {"company_name": "Beacon Retail Group", "employee_count": 900, "industry": "Retail", "hq_country": "United States", "tech_stack": ["SAP"], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.85}, "vantage-insure.com": {"company_name": "Vantage Insurance Partners", "employee_count": 1500, "industry": "Insurance", "hq_country": "United States", "tech_stack": ["Snowflake"], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.88}, "quantum-health-a.com": {"company_name": "Quantum Health Analytics", "employee_count": 250, "industry": "Healthcare software", "hq_country": "United States", "tech_stack": ["Snowflake"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.86}, "fern-robotics.com": {"company_name": "Fern Robotics", "employee_count": 180, "industry": "Robotics", "hq_country": "United States", "tech_stack": ["BigQuery"], "funding_stage": "Series A", "annual_revenue": null, "confidence": 0.79}, "cedar-dental.com": {"company_name": "Cedar Dental Partners", "employee_count": 60, "industry": "Dental", "hq_country": "United States", "tech_stack": [], "funding_stage": "Bootstrapped", "annual_revenue": null, "confidence": 0.71}, "orbital-freight.com": {"company_name": "Orbital Freight", "employee_count": 8000, "industry": "Transportation", "hq_country": "United States", "tech_stack": [], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.9}, "lumen-banking.com": {"company_name": "Lumen Banking Group", "employee_count": 1200, "industry": "Banking", "hq_country": "Canada", "tech_stack": ["Databricks"], "funding_stage": "Public", "annual_revenue": null, "confidence": 0.89}, "vireo-bio.com": {"company_name": "Vireo Biotech", "employee_count": null, "industry": "Biotech", "hq_country": "United States", "tech_stack": ["Snowflake"], "funding_stage": "Series B", "annual_revenue": null, "confidence": 0.55}};
+const LEADS = [{"lead_id": "L-001", "contact_name": "Jane Doe", "email": "ops@northwind-health.com", "message": "Looking to consolidate our patient analytics reporting.", "requested_demo": true, "pricing_page_visits": 3, "emails_opened": 5, "human_label": "book a call", "human_reasoning": "340 staff healthcare software demo requested warehouse present"}, {"lead_id": "L-002", "contact_name": "Marcus Hale", "email": "finance@ledgerline.io", "message": "Evaluating options for finance data consolidation this quarter.", "requested_demo": false, "pricing_page_visits": 2, "emails_opened": 4, "human_label": "book a call", "human_reasoning": "145 staff fintech warehouse present repeat pricing visits signal real evaluation"}, {"lead_id": "L-003", "contact_name": "Priya Raman", "email": "hello@brightpath-clinics.com", "message": "Curious what this costs for a small clinic group.", "requested_demo": true, "pricing_page_visits": 1, "emails_opened": 2, "human_label": "nurture", "human_reasoning": "only 90 staff below our band and no warehouse so implementation would stall"}, {"lead_id": "L-004", "contact_name": "Tom Feld", "email": "cto@datastack-labs.com", "message": "We need to automate inbound routing across three regions.", "requested_demo": true, "pricing_page_visits": 4, "emails_opened": 6, "human_label": "book a call", "human_reasoning": "1200 staff SaaS full modern stack strongest lead in the set"}, {"lead_id": "L-005", "contact_name": "Dana Ruiz", "email": "ops@fieldstone-clinics.com", "message": "Want to see how you handle clinical operations data.", "requested_demo": true, "pricing_page_visits": 1, "emails_opened": 2, "human_label": "book a call", "human_reasoning": "220 staff demo requested warehouse present and medical devices IS healthcare in practice"}, {"lead_id": "L-006", "contact_name": "Alex Kim", "email": "growth@paylink-pay.com", "message": "Interested in your enrichment coverage for EU payments.", "requested_demo": true, "pricing_page_visits": 3, "emails_opened": 4, "human_label": "abstain", "human_reasoning": "cannot size the company from enrichment so a human should qualify this one"}, {"lead_id": "L-007", "contact_name": "Rob Singh", "email": "it@summit-logistics.com", "message": "Please add me to your newsletter.", "requested_demo": false, "pricing_page_visits": 0, "emails_opened": 1, "human_label": "disqualify", "human_reasoning": "5400 staff logistics no warehouse no intent wrong on every axis"}, {"lead_id": "L-008", "contact_name": "Leah Tran", "email": "team@verdant-saas.io", "message": "Comparing three vendors for GTM automation.", "requested_demo": true, "pricing_page_visits": 2, "emails_opened": 3, "human_label": "book a call", "human_reasoning": "260 staff SaaS Canada Databricks demo requested clean fit"}, {"lead_id": "L-009", "contact_name": "Sam Ortiz", "email": "admin@oakmont-dental.com", "message": "Do you have a free plan?", "requested_demo": false, "pricing_page_visits": 1, "emails_opened": 0, "human_label": "disqualify", "human_reasoning": "25 person dental practice far below band and no buying signal"}, {"lead_id": "L-010", "contact_name": "Nadia Farouk", "email": "vp@cascade-fintech.com", "message": "Scoping a Q4 rollout for our revenue team.", "requested_demo": true, "pricing_page_visits": 5, "emails_opened": 8, "human_label": "book a call", "human_reasoning": "780 staff fintech UK Snowflake highest intent scores in the set"}, {"lead_id": "L-011", "contact_name": "Chris Bell", "email": "hi@nimbus-analytics.com", "message": "Sent from the contact form.", "requested_demo": null, "pricing_page_visits": 3, "emails_opened": 4, "human_label": "abstain", "human_reasoning": "demo field never submitted so intent is unknown not absent"}, {"lead_id": "L-012", "contact_name": "Grace Yoon", "email": "ops@harborview-health.org", "message": "Reviewing tooling for our care coordination team.", "requested_demo": false, "pricing_page_visits": 2, "emails_opened": 3, "human_label": "book a call", "human_reasoning": "1900 staff healthcare Synapse present top of band but still in it"}, {"lead_id": "L-013", "contact_name": "Ivan Petrov", "email": "dev@quantum-ledger.io", "message": "Testing your API for a side project.", "requested_demo": true, "pricing_page_visits": 1, "emails_opened": 2, "human_label": "nurture", "human_reasoning": "60 staff seed stage and Singapore is outside where we sell"}, {"lead_id": "L-014", "contact_name": "Wendy Cole", "email": "lead@stonebridge-insure.com", "message": "Our brokers need better lead triage.", "requested_demo": true, "pricing_page_visits": 2, "emails_opened": 3, "human_label": "nurture", "human_reasoning": "3200 staff insurance above our band procurement cycle too long for now"}, {"lead_id": "L-015", "contact_name": "Omar Haddad", "email": "ceo@tinyseed-saas.com", "message": "Love the product want to try it.", "requested_demo": true, "pricing_page_visits": 1, "emails_opened": 1, "human_label": "nurture", "human_reasoning": "12 person pre seed enthusiastic but no budget yet worth nurturing"}, {"lead_id": "L-016", "contact_name": "Fiona Walsh", "email": "ops@meridian-care.com", "message": "Downloaded your integration guide.", "requested_demo": false, "pricing_page_visits": 0, "emails_opened": 0, "human_label": "nurture", "human_reasoning": "450 staff healthcare great fit but zero intent signal so do not call yet"}, {"lead_id": "L-017", "contact_name": "Klaus Berger", "email": "procurement@ironclad-mfg.com", "message": "Requesting vendor documentation for our records.", "requested_demo": false, "pricing_page_visits": 0, "emails_opened": 0, "human_label": "disqualify", "human_reasoning": "manufacturing no warehouse no intent procurement box ticking"}, {"lead_id": "L-018", "contact_name": "Mia Santos", "email": "hello@lumen-fintech.com", "message": "Need to replace a manual routing spreadsheet.", "requested_demo": true, "pricing_page_visits": 2, "emails_opened": 3, "human_label": "book a call", "human_reasoning": "320 staff fintech Australia Redshift demo requested clean fit"}, {"lead_id": "L-019", "contact_name": "Paul Nkemdi", "email": "info@grandview-hospital.org", "message": "Our intake team is drowning in referrals.", "requested_demo": true, "pricing_page_visits": 2, "emails_opened": 4, "human_label": "nurture", "human_reasoning": "2600 staff above band no warehouse Epic only so a call now would be premature"}, {"lead_id": "L-020", "contact_name": "Sara Lindqvist", "email": "ops@clearwater-labs.com", "message": "Want to automate our inbound qualification.", "requested_demo": true, "pricing_page_visits": 3, "emails_opened": 5, "human_label": "book a call", "human_reasoning": "175 staff SaaS Netherlands BigQuery and dbt exactly our profile"}];
+const ATTACKS = [{"name": "invented funding amount", "support": "funding_stage", "text": "Congratulations on the Series B, raising $40M is no small thing."}, {"name": "no supporting field", "support": "", "text": "Your competitors are already automating this."}, {"name": "rounded the headcount", "support": "employee_count", "text": "At around 350 people manual triage stops scaling."}, {"name": "the true headcount", "support": "employee_count", "text": "At 340 people manual triage stops scaling."}, {"name": "percentage injection", "support": "tech_stack", "text": "Teams on Snowflake cut triage time 60% with this."}, {"name": "magnitude in words", "support": "employee_count", "text": "With several hundred people, triage is a real cost for you."}, {"name": "gets through: unsupported judgement", "support": "tech_stack", "text": "Since you already run Snowflake, your data team is clearly mature."}, {"name": "gets through: invented buying signal", "support": "company_name", "text": "Northwind Health is evaluating vendors this quarter."}];
+const FIELDS = ["company_name","employee_count","industry","hq_country",
+                "tech_stack","funding_stage","annual_revenue"];
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- section 1
+function currentLead() {
+  const lead = LEADS.find((l) => l.lead_id === $('lead').value) || LEADS[0];
+  const org = ENRICH[lead.email.split('@')[1]] || {};
+  const empRaw = $('emp').value.trim();
+  return {
+    lead,
+    facts: {
+      ...org,
+      employee_count: empRaw === '' ? null : Number(empRaw),
+      requested_demo: $('demo').value === '' ? null : $('demo').value === 'true',
+      pricing_page_visits: $('pricing').value === '' ? null : Number($('pricing').value),
+      emails_opened: $('emails').value === '' ? null : Number($('emails').value),
+    },
+    org,
+  };
+}
+
+function badge(r) {
+  const cls = r === 'book a call' ? 'b-call' : r === 'nurture' ? 'b-nurture'
+    : r === 'abstain' ? 'b-abstain' : 'b-dq';
+  return `<span class="badge ${cls}">${esc(r)}</span>`;
+}
+
+function render() {
+  const { lead, facts, org } = currentLead();
+  const r1 = route(qualify(facts, V1), V1);
+  const r2 = route(qualify(facts, V2), V2);
+
+  $('company').innerHTML = `<div class="sub"><b>${esc(org.company_name || 'unknown company')}</b>`
+    + ` &middot; ${esc(org.industry || 'industry unknown')}`
+    + ` &middot; ${esc(org.hq_country || 'country unknown')}`
+    + ` &middot; ${esc((org.tech_stack || []).join(', ') || 'no tech signals')}</div>`
+    + `<div class="sub" style="margin-top:6px">"${esc(lead.message)}"</div>`;
+
+  const moved = r1.route !== r2.route;
+  $('decision').innerHTML =
+    `<div class="kv"><span>rubric v1</span><span>${badge(r1.route)} <b>${r1.score}</b></span></div>`
+    + `<div class="kv"><span>rubric v2</span><span>${badge(r2.route)} <b>${r2.score}</b></span></div>`
+    + `<div class="kv"><span>a human said</span><b>${esc(lead.human_label)}</b></div>`
+    + (moved ? `<div class="why"><b>v2 changed this decision.</b> ${esc(r2.explanation)}</div>`
+             : `<div class="why">${esc(r2.explanation)}</div>`);
+
+  const q2 = qualify(facts, V2);
+  $('breakdown').innerHTML = q2.breakdown.map((b) => {
+    const cls = b.verdict === 'met' ? 'met'
+      : (b.verdict === 'missing' || b.verdict === 'unrecognised') ? 'miss' : 'notmet';
+    return `<tr><td>${esc(b.label)}</td>`
+      + `<td class="n">${b.awarded}/${b.available}</td>`
+      + `<td class="${cls}">${esc(b.verdict)}</td></tr>`;
+  }).join('')
+   + `<tr><td><b>Total</b></td><td class="n"><b>${q2.score}</b></td>`
+   + `<td class="sub">fit ${q2.fit_score} / intent ${q2.intent_score}</td></tr>`;
+}
+
+// ---------- section 2
+const GATE_RECORD = ENRICH['northwind-health.com'];
+
+function renderRecord() {
+  $('record').innerHTML = FIELDS.map((f) => {
+    const v = GATE_RECORD[f];
+    const shown = v === null || v === undefined ? '<i>unresolved</i>'
+      : Array.isArray(v) ? esc(v.join(', ')) : esc(v);
+    return `<code>${f}</code> ${shown}`;
+  }).join(' &nbsp; ');
+}
+
+function checkClaim() {
+  const text = $('claim').value.trim();
+  if (!text) return;
+  const support = $('support').value || null;
+  const res = validate([{ text, support }], GATE_RECORD);
+
+  if (res.passed) {
+    const risky = /clearly|obviously|mature|evaluating|mostly|probably|seems|likely/i.test(text);
+    $('gate').innerHTML = `<div class="verdict ${risky ? 'v-hole' : 'v-pass'}">`
+      + `<b>Passed.</b> Every claim traces to a real field and every number is `
+      + `in the record.`
+      + (risky
+        ? `<br><br><b>And this is the known hole.</b> The sentence cites a real `
+          + `field whose value genuinely appears, and carries no invented number, `
+          + `so the gate has no basis to reject it. But it asserts more than the `
+          + `field supports. A field-level citation check cannot tell "you run `
+          + `Snowflake" from "your data team is clearly mature". Closing that `
+          + `needs an entailment check, which is a model-graded eval rather than `
+          + `a regex.`
+        : '')
+      + `</div>`;
+  } else {
+    $('gate').innerHTML = `<div class="verdict v-block"><b>Rejected, and the `
+      + `whole draft is withheld.</b><br>${esc(res.rejected[0].why)}</div>`;
+  }
+}
+
+// ---------- boot
+$('lead').innerHTML = LEADS.map((l) => {
+  const org = ENRICH[l.email.split('@')[1]] || {};
+  return `<option value="${l.lead_id}">${l.lead_id} &middot; `
+    + `${esc(org.company_name || l.email)}</option>`;
+}).join('');
+
+$('support').innerHTML = '<option value="">(no field, unsupported)</option>'
+  + FIELDS.map((f) => `<option value="${f}">${f}</option>`).join('');
+$('support').value = 'funding_stage';
+
+$('attacks').innerHTML = ATTACKS.map((a, i) =>
+  `<button data-i="${i}">${esc(a.name)}</button>`).join('');
+$('attacks').onclick = (e) => {
+  const i = e.target.dataset.i;
+  if (i === undefined) return;
+  $('claim').value = ATTACKS[i].text;
+  $('support').value = ATTACKS[i].support;
+  checkClaim();
+};
+
+function syncLead() {
+  const lead = LEADS.find((l) => l.lead_id === $('lead').value) || LEADS[0];
+  const org = ENRICH[lead.email.split('@')[1]] || {};
+  $('demo').value = lead.requested_demo === null ? '' : String(lead.requested_demo);
+  $('pricing').value = lead.pricing_page_visits ?? '';
+  $('emails').value = lead.emails_opened ?? '';
+  $('emp').value = org.employee_count ?? '';
+  render();
+}
+
+$('lead').onchange = syncLead;
+['demo', 'pricing', 'emails', 'emp'].forEach((id) => {
+  $(id).oninput = render; $(id).onchange = render;
+});
+$('check').onclick = checkClaim;
+
+syncLead();
+renderRecord();
+checkClaim();
+</script>
+</body></html>

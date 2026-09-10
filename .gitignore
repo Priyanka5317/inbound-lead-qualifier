@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 out/
 report.html
+
+# report.html is generated per run. web/index.html is generated too
+# but ships, because GitHub Pages serves it.

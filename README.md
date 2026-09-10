@@ -14,6 +14,39 @@ Three things run against the real world rather than fixtures: **live enrichment*
 
 ---
 
+## Try it without installing anything
+
+**[Open the live demo](https://priyanka5317.github.io/inbound-lead-qualifier/web/)**
+
+Qualify a lead and watch both rubric versions score it, then try to sneak a
+false claim past the outbound gate yourself. Runs entirely in your browser,
+no server and no key. The scoring in it is the same code the test suite runs,
+and `tests/check_demo.cjs` proves the browser agrees with the Python
+evaluation on all 20 leads.
+
+## The GTM motion this automates
+
+Inbound form to booked call, which is the loop a GTM Engineer is hired to
+build:
+
+```
+enquiry -> research the account -> qualify against the ICP
+        -> route -> draft outreach -> QA the outreach
+```
+
+Three of those steps have an agent, and each is named for the GTM job rather
+than the technique:
+
+| Agent | The GTM job | Status |
+|---|---|---|
+| `enrich_agent.py` | account research before a rep touches it | built, eval needs a key |
+| `entailment_judge.py` | outbound QA, so an email never lies to a prospect | built, unrun |
+| `rubric_critic.py` | ICP tuning from rep disagreement | built, unrun |
+
+**Deliberately not an agent: the scoring itself.** A rubric you can diff,
+test and explain to the salesperson who disagrees with it beats a model you
+cannot. Agents go where judgement genuinely helps, not everywhere.
+
 ## Start here
 
 ```bash
@@ -153,6 +186,62 @@ one of its printed outcomes.
 The fixed baseline above needs no credentials and runs today. The agent half
 needs a key, and until it has one the eval prints it as **pending rather than
 skipped**, because an unrun comparison is not the same as a favourable one.
+
+---
+
+## Agent 2: outbound QA
+
+The red team found three attacks that walk through the regex gate, and named
+the fix itself: *closing it needs an entailment check, a model-graded eval
+rather than a regex.* `src/entailment_judge.py` is that check.
+
+It asks one question: **does the cited field entail the sentence, or does the
+sentence assert more than the field states?**
+
+```
+field tech_stack = ["HubSpot","Snowflake","AWS"]
+  "You already run Snowflake."                          entailed
+  "Since you run Snowflake, your data team is mature."  overreach
+```
+
+It runs as a **second** layer, never instead of the first. The regex pass is
+free and deterministic and removes the crude attacks; the model is slow and
+costs money, so it only ever sees what survived. Cheap filter first is what
+makes this affordable on every draft.
+
+```bash
+python src/entailment_judge.py --schema    # the output contract, no key
+```
+
+Honest status: **written, not run.** Its catch rate against the three known
+escapes is unknown, and the tool prints it as unknown rather than assuming a
+number.
+
+## Agent 3: ICP tuning from rep disagreement
+
+Every week a salesperson rejects leads the model sent and accepts ones it did
+not. That disagreement is the most valuable signal a revenue team produces
+and it is almost always discarded. `src/rubric_critic.py` reads it and
+proposes the next rubric version.
+
+**The agent proposes. The measurement decides.** Its patch is applied to a
+copy, scored on the golden and held-out sets, and accepted only if the
+held-out number improves with no regression. A failed proposal is printed
+with its score and thrown away. The live rubric is never overwritten.
+
+**The action space is deliberately tiny** and that is the safety mechanism:
+
+```
+set_threshold  set_criterion_points  add_industry_synonym  add_industry_outside_icp
+```
+
+It cannot add criteria, remove them, change how a test works, or restructure
+scoring. Every action is validated before it lands. Fed a deliberately
+hostile patch, 5 of 6 actions are refused and the live rubric is untouched.
+
+That gate matters more than the agent does. A model asked to improve a rubric
+will always produce something; only data it has not seen can say whether that
+something is an improvement.
 
 ---
 
@@ -319,6 +408,11 @@ src/report.py                generates the self-contained HTML report
 src/providers.py             step 2 as used, offline + live four-source waterfall
 src/enrich_agent.py          the agent: four sources as tools, model picks
 src/agent_eval.py            fixed policy vs agent, coverage against cost
+src/entailment_judge.py      agent 2, outbound QA, closes the red team hole
+src/rubric_critic.py         agent 3, ICP tuning, proposal gated by the eval
+src/build_demo.py            generates the browser demo, data inlined
+web/rubric-engine.js         the rubric in JS, shared by demo and parity test
+web/index.html               the live demo, generated, self contained
 src/llm_drafter.py           the real claude-opus-5 call, structured output
 tests/run_workflow.mjs       executes the exported n8n graph, both branches
 n8n/inbound-lead-qualifier.json   the 5 node workflow, importable
@@ -342,6 +436,10 @@ python src/evaluate.py                          # the accuracy number
 python src/compare.py                           # rubric v1 vs v2, both sets
 python src/redteam.py                           # attack the gate
 python src/report.py --open                     # the HTML report
+python src/build_demo.py                        # rebuild the browser demo
+python src/entailment_judge.py --schema         # agent 2 output contract
+python src/rubric_critic.py --actions           # agent 3 action space
+node tests/check_demo.cjs                       # the demo, functionally tested
 python src/drift.py                             # distribution check
 node tests/parity_check.mjs                     # rubric parity
 python demo.py                                  # guided 90 second walkthrough
