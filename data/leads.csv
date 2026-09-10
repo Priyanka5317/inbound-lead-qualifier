@@ -1,0 +1,7 @@
+lead_id,contact_name,email,message,requested_demo,pricing_page_visits,emails_opened
+S-001,Jane Doe,jane.doe@northwind-health.com,"Looking to consolidate our patient analytics reporting.",true,3,5
+S-002,Alex Kim,growth@paylink-pay.com,"Interested in your enrichment coverage for EU payments.",true,3,4
+S-003,Rob Singh,it@summit-logistics.com,"Please add me to your newsletter.",false,0,1
+S-004,Nadia Farouk,vp@cascade-fintech.com,"Scoping a Q4 rollout for our revenue team.",true,5,8
+S-005,Dana Ruiz,ops@fieldstone-clinics.com,"Want to see how you handle clinical operations data.",true,1,2
+S-006,Unknown Prospect,hello@company-we-have-never-seen.com,"Saw you on a podcast.",true,1,1

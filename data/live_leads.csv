@@ -1,0 +1,6 @@
+lead_id,contact_name,email,message,requested_demo,pricing_page_visits,emails_opened
+V-001,Jane Doe,ops@stripe.com,"Looking at consolidating our payments reporting.",true,3,5
+V-002,Marcus Hale,data@snowflake.com,"Evaluating options for our analytics team.",true,2,4
+V-003,Leah Tran,team@vercel.com,"Comparing vendors for GTM automation.",true,2,3
+V-004,Sam Ortiz,hello@notion.so,"Curious what this costs.",false,1,1
+V-005,Alex Kim,growth@a-domain-that-does-not-exist-xyz.com,"Saw you on a podcast.",true,3,4

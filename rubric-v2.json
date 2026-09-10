@@ -1,0 +1,129 @@
+{
+  "_comment": "v2. Every change below fixes a defect the v1 golden set actually exposed, and each is recorded with the lead that found it. Nothing here was changed on taste.",
+  "version": "2.0.0",
+  "authored": "2026-09-10",
+  "parent": "1.0.0",
+  "changelog": [
+    {
+      "found_by": "L-005",
+      "defect": "A 220 person clinical operations company lost the entire 20 point industry block because the provider recorded its industry as 'Medical devices' and the rubric matched the literal keyword 'healthcare'. The lead was fine; the category label was not.",
+      "rejected_fix": "Lower the booking threshold. That trades a taxonomy bug for a precision loss on every other lead.",
+      "fix": "Normalise the provider's industry string through a synonym table before matching. Anything the table does not recognise at all is treated as MISSING rather than as a zero, which is the missing-data rule applied one level up.",
+      "corroboration": "Reproduced independently on live data: Wikidata records Stripe as 'financial services', which the v1 keyword list also missed."
+    },
+    {
+      "found_by": "L-019",
+      "defect": "A 2600 person hospital with no warehouse cleared the booking threshold on intent alone, scoring the full 40 and landing exactly on 70. Above the size band, no warehouse, so an implementation would stall.",
+      "rejected_fix": "Reweight intent downward. That punishes genuinely interested leads that also fit.",
+      "fix": "Fit and intent are not substitutes. Require a minimum fit score before intent can promote a lead to a call. Below the floor the lead can still reach nurture, so nothing is lost, it is only slowed."
+    }
+  ],
+  "fit": {
+    "max": 60,
+    "criteria": [
+      {
+        "id": "employee_count_in_band",
+        "points": 20,
+        "field": "employee_count",
+        "test": "between",
+        "min": 100,
+        "max": 2000,
+        "label": "Employee count 100 to 2000"
+      },
+      {
+        "id": "industry_in_icp",
+        "points": 20,
+        "field": "industry",
+        "test": "taxonomy",
+        "canonical": ["healthcare", "fintech", "saas"],
+        "synonyms": {
+          "medical devices": "healthcare",
+          "clinical": "healthcare",
+          "health": "healthcare",
+          "hospital": "healthcare",
+          "biotech": "healthcare",
+          "life sciences": "healthcare",
+          "pharma": "healthcare",
+          "dental": "healthcare",
+          "financial services": "fintech",
+          "financial technology": "fintech",
+          "payments": "fintech",
+          "banking": "fintech",
+          "lending": "fintech",
+          "software": "saas",
+          "cloud": "saas",
+          "b2b software": "saas",
+          "enterprise software": "saas",
+          "data infrastructure": "saas"
+        },
+        "known_outside_icp": [
+          "logistics", "manufacturing", "insurance", "retail", "construction",
+          "hospitality", "education", "agriculture", "mining", "energy",
+          "real estate", "transportation", "media", "telecom", "automotive",
+          "government", "legal", "nonprofit", "consulting"
+        ],
+        "unrecognised_is_missing": true,
+        "label": "Industry in [healthcare, fintech, SaaS] after synonym mapping"
+      },
+      {
+        "id": "has_cloud_warehouse",
+        "points": 10,
+        "field": "tech_stack",
+        "test": "list_contains_any",
+        "keywords": ["snowflake", "bigquery", "redshift", "databricks", "synapse"],
+        "label": "Tech stack includes a cloud warehouse"
+      },
+      {
+        "id": "sellable_country",
+        "points": 10,
+        "field": "hq_country",
+        "test": "in_set",
+        "values": [
+          "United States", "Canada", "United Kingdom", "Germany",
+          "Australia", "Netherlands", "Ireland", "Sweden"
+        ],
+        "label": "Based in a country we sell to"
+      }
+    ]
+  },
+  "intent": {
+    "max": 40,
+    "criteria": [
+      {
+        "id": "requested_demo",
+        "points": 25,
+        "field": "requested_demo",
+        "test": "is_true",
+        "label": "Requested a demo"
+      },
+      {
+        "id": "pricing_page_repeat",
+        "points": 10,
+        "field": "pricing_page_visits",
+        "test": "gte",
+        "value": 2,
+        "label": "Visited pricing page 2+ times"
+      },
+      {
+        "id": "email_engagement",
+        "points": 5,
+        "field": "emails_opened",
+        "test": "gte",
+        "value": 3,
+        "label": "Opened 3+ emails"
+      }
+    ]
+  },
+  "routing": {
+    "book_a_call_at_or_above": 70,
+    "nurture_at_or_above": 40,
+    "below_nurture": "disqualify",
+    "minimum_fit_to_book": 40,
+    "minimum_fit_note": "Fit and intent are not substitutes. A lead below this fit score cannot be promoted to a call by intent alone; it falls back to nurture. Found by L-019.",
+    "abstain_rule": {
+      "trigger": "any_missing_field_worth_at_least",
+      "points": 20,
+      "note": "Missing data is not zero. As of v2 an industry the taxonomy does not recognise counts as missing too, rather than silently scoring zero."
+    }
+  }
+}

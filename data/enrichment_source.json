@@ -1,0 +1,361 @@
+{
+  "_comment": "Stands in for Apollo/Clay so the whole project runs offline with no API key and no paid tier. src/enrich.py talks to this through the same adapter interface a live provider would use, so swapping in Apollo is a one-function change. Nulls are deliberate: real enrichment misses fields, and the abstain path exists because of it.",
+  "northwind-health.com": {
+    "company_name": "Northwind Health",
+    "employee_count": 340,
+    "industry": "Healthcare software",
+    "hq_country": "United States",
+    "tech_stack": [
+      "HubSpot",
+      "Snowflake",
+      "AWS"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.86
+  },
+  "ledgerline.io": {
+    "company_name": "Ledgerline",
+    "employee_count": 145,
+    "industry": "Fintech",
+    "hq_country": "United States",
+    "tech_stack": [
+      "BigQuery",
+      "Stripe"
+    ],
+    "funding_stage": "Series A",
+    "annual_revenue": null,
+    "confidence": 0.81
+  },
+  "brightpath-clinics.com": {
+    "company_name": "Brightpath Clinics",
+    "employee_count": 90,
+    "industry": "Healthcare services",
+    "hq_country": "United States",
+    "tech_stack": [
+      "HubSpot"
+    ],
+    "funding_stage": "Bootstrapped",
+    "annual_revenue": null,
+    "confidence": 0.74
+  },
+  "datastack-labs.com": {
+    "company_name": "Datastack Labs",
+    "employee_count": 1200,
+    "industry": "SaaS",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake",
+      "dbt",
+      "AWS"
+    ],
+    "funding_stage": "Series D",
+    "annual_revenue": null,
+    "confidence": 0.91
+  },
+  "fieldstone-clinics.com": {
+    "company_name": "Fieldstone Clinics",
+    "employee_count": 220,
+    "industry": "Medical devices",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Redshift"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.78
+  },
+  "paylink-pay.com": {
+    "company_name": "Paylink",
+    "employee_count": null,
+    "industry": "Fintech",
+    "hq_country": "United States",
+    "tech_stack": [
+      "BigQuery"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.52
+  },
+  "summit-logistics.com": {
+    "company_name": "Summit Logistics",
+    "employee_count": 5400,
+    "industry": "Logistics",
+    "hq_country": "United States",
+    "tech_stack": [
+      "SAP"
+    ],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.88
+  },
+  "verdant-saas.io": {
+    "company_name": "Verdant",
+    "employee_count": 260,
+    "industry": "SaaS",
+    "hq_country": "Canada",
+    "tech_stack": [
+      "Databricks"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.83
+  },
+  "oakmont-dental.com": {
+    "company_name": "Oakmont Dental",
+    "employee_count": 25,
+    "industry": "Healthcare services",
+    "hq_country": "United States",
+    "tech_stack": [],
+    "funding_stage": "Bootstrapped",
+    "annual_revenue": null,
+    "confidence": 0.69
+  },
+  "cascade-fintech.com": {
+    "company_name": "Cascade Fintech",
+    "employee_count": 780,
+    "industry": "Fintech",
+    "hq_country": "United Kingdom",
+    "tech_stack": [
+      "Snowflake",
+      "Looker"
+    ],
+    "funding_stage": "Series C",
+    "annual_revenue": null,
+    "confidence": 0.9
+  },
+  "nimbus-analytics.com": {
+    "company_name": "Nimbus Analytics",
+    "employee_count": 110,
+    "industry": "SaaS",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake"
+    ],
+    "funding_stage": "Series A",
+    "annual_revenue": null,
+    "confidence": 0.8
+  },
+  "harborview-health.org": {
+    "company_name": "Harborview Health",
+    "employee_count": 1900,
+    "industry": "Healthcare",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Azure Synapse"
+    ],
+    "funding_stage": "Nonprofit",
+    "annual_revenue": null,
+    "confidence": 0.84
+  },
+  "quantum-ledger.io": {
+    "company_name": "Quantum Ledger",
+    "employee_count": 60,
+    "industry": "Fintech",
+    "hq_country": "Singapore",
+    "tech_stack": [
+      "BigQuery"
+    ],
+    "funding_stage": "Seed",
+    "annual_revenue": null,
+    "confidence": 0.71
+  },
+  "stonebridge-insure.com": {
+    "company_name": "Stonebridge Insurance",
+    "employee_count": 3200,
+    "industry": "Insurance",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake"
+    ],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.87
+  },
+  "tinyseed-saas.com": {
+    "company_name": "TinySeed",
+    "employee_count": 12,
+    "industry": "SaaS",
+    "hq_country": "United States",
+    "tech_stack": [],
+    "funding_stage": "Pre-seed",
+    "annual_revenue": null,
+    "confidence": 0.63
+  },
+  "meridian-care.com": {
+    "company_name": "Meridian Care",
+    "employee_count": 450,
+    "industry": "Healthcare",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake",
+      "HubSpot"
+    ],
+    "funding_stage": "Series C",
+    "annual_revenue": null,
+    "confidence": 0.89
+  },
+  "ironclad-mfg.com": {
+    "company_name": "Ironclad Manufacturing",
+    "employee_count": 900,
+    "industry": "Manufacturing",
+    "hq_country": "Germany",
+    "tech_stack": [],
+    "funding_stage": "Private",
+    "annual_revenue": null,
+    "confidence": 0.76
+  },
+  "lumen-fintech.com": {
+    "company_name": "Lumen Fintech",
+    "employee_count": 320,
+    "industry": "Fintech",
+    "hq_country": "Australia",
+    "tech_stack": [
+      "Redshift"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.85
+  },
+  "grandview-hospital.org": {
+    "company_name": "Grandview Hospital",
+    "employee_count": 2600,
+    "industry": "Healthcare",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Epic"
+    ],
+    "funding_stage": "Nonprofit",
+    "annual_revenue": null,
+    "confidence": 0.82
+  },
+  "clearwater-labs.com": {
+    "company_name": "Clearwater Labs",
+    "employee_count": 175,
+    "industry": "SaaS",
+    "hq_country": "Netherlands",
+    "tech_stack": [
+      "BigQuery",
+      "dbt"
+    ],
+    "funding_stage": "Series A",
+    "annual_revenue": null,
+    "confidence": 0.86
+  },
+  "solace-medical.com": {
+    "company_name": "Solace Medical Devices",
+    "employee_count": 300,
+    "industry": "Medical devices",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Redshift"
+    ],
+    "funding_stage": "Series C",
+    "annual_revenue": null,
+    "confidence": 0.83
+  },
+  "northgate-pay.com": {
+    "company_name": "Northgate Payments",
+    "employee_count": 500,
+    "industry": "Financial services",
+    "hq_country": "United Kingdom",
+    "tech_stack": [
+      "BigQuery"
+    ],
+    "funding_stage": "Series C",
+    "annual_revenue": null,
+    "confidence": 0.87
+  },
+  "beacon-retail.com": {
+    "company_name": "Beacon Retail Group",
+    "employee_count": 900,
+    "industry": "Retail",
+    "hq_country": "United States",
+    "tech_stack": [
+      "SAP"
+    ],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.85
+  },
+  "vantage-insure.com": {
+    "company_name": "Vantage Insurance Partners",
+    "employee_count": 1500,
+    "industry": "Insurance",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake"
+    ],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.88
+  },
+  "quantum-health-a.com": {
+    "company_name": "Quantum Health Analytics",
+    "employee_count": 250,
+    "industry": "Healthcare software",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.86
+  },
+  "fern-robotics.com": {
+    "company_name": "Fern Robotics",
+    "employee_count": 180,
+    "industry": "Robotics",
+    "hq_country": "United States",
+    "tech_stack": [
+      "BigQuery"
+    ],
+    "funding_stage": "Series A",
+    "annual_revenue": null,
+    "confidence": 0.79
+  },
+  "cedar-dental.com": {
+    "company_name": "Cedar Dental Partners",
+    "employee_count": 60,
+    "industry": "Dental",
+    "hq_country": "United States",
+    "tech_stack": [],
+    "funding_stage": "Bootstrapped",
+    "annual_revenue": null,
+    "confidence": 0.71
+  },
+  "orbital-freight.com": {
+    "company_name": "Orbital Freight",
+    "employee_count": 8000,
+    "industry": "Transportation",
+    "hq_country": "United States",
+    "tech_stack": [],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.9
+  },
+  "lumen-banking.com": {
+    "company_name": "Lumen Banking Group",
+    "employee_count": 1200,
+    "industry": "Banking",
+    "hq_country": "Canada",
+    "tech_stack": [
+      "Databricks"
+    ],
+    "funding_stage": "Public",
+    "annual_revenue": null,
+    "confidence": 0.89
+  },
+  "vireo-bio.com": {
+    "company_name": "Vireo Biotech",
+    "employee_count": null,
+    "industry": "Biotech",
+    "hq_country": "United States",
+    "tech_stack": [
+      "Snowflake"
+    ],
+    "funding_stage": "Series B",
+    "annual_revenue": null,
+    "confidence": 0.55
+  }
+}

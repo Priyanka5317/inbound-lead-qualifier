@@ -1,0 +1,11 @@
+lead_id,contact_name,email,message,requested_demo,pricing_page_visits,emails_opened,human_label,human_reasoning
+H-001,Ana Ruiz,ops@solace-medical.com,"Need to consolidate our device telemetry reporting.",true,1,2,book a call,"300 staff clinical operations warehouse present demo requested"
+H-002,Tom Blake,data@northgate-pay.com,"Scoping a rollout for our revenue team.",true,2,3,book a call,"500 staff payments UK BigQuery strong intent"
+H-003,Ravi Menon,it@beacon-retail.com,"Our store ops team wants better lead triage.",true,2,3,nurture,"retail is outside our ICP and no warehouse so implementation stalls"
+H-004,Karen Vogt,ops@vantage-insure.com,"Evaluating options for our broker network.",true,2,3,nurture,"insurance is outside ICP even though size and warehouse fit"
+H-005,Ben Osei,info@quantum-health-a.com,"Downloaded your integration guide.",false,0,0,nurture,"great fit but zero intent signal so do not call yet"
+H-006,Lena Fischer,eng@fern-robotics.com,"Automating our inbound qualification.",true,2,3,abstain,"robotics is not a category we have a position on so a human should decide"
+H-007,Dee Carter,admin@cedar-dental.com,"What does this cost for a small practice?",true,1,1,nurture,"only 60 staff but real healthcare and asked for a demo"
+H-008,Phil Nowak,procurement@orbital-freight.com,"Please send vendor documentation.",false,0,1,disqualify,"8000 staff transportation no warehouse no intent"
+H-009,Marie Dubois,vp@lumen-banking.com,"Replacing a manual routing spreadsheet.",true,3,4,book a call,"1200 staff banking Canada Databricks clean fit and intent"
+H-010,Yusuf Demir,ops@vireo-bio.com,"Interested in your data quality tooling.",true,2,3,abstain,"cannot size the company from enrichment so a human should qualify"

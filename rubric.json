@@ -1,0 +1,84 @@
+{
+  "_comment": "Written BEFORE any prompt. The prompt is an implementation of this file, not a replacement for it. Appendix B.2 of the bootcamp.",
+  "version": "1.0.0",
+  "authored": "2026-09-10",
+  "fit": {
+    "max": 60,
+    "criteria": [
+      {
+        "id": "employee_count_in_band",
+        "points": 20,
+        "field": "employee_count",
+        "test": "between",
+        "min": 100,
+        "max": 2000,
+        "label": "Employee count 100 to 2000"
+      },
+      {
+        "id": "industry_in_icp",
+        "points": 20,
+        "field": "industry",
+        "test": "keyword_any",
+        "keywords": ["healthcare", "fintech", "saas"],
+        "label": "Industry in [healthcare, fintech, SaaS]"
+      },
+      {
+        "id": "has_cloud_warehouse",
+        "points": 10,
+        "field": "tech_stack",
+        "test": "list_contains_any",
+        "keywords": ["snowflake", "bigquery", "redshift", "databricks", "synapse"],
+        "label": "Tech stack includes a cloud warehouse"
+      },
+      {
+        "id": "sellable_country",
+        "points": 10,
+        "field": "hq_country",
+        "test": "in_set",
+        "values": [
+          "United States", "Canada", "United Kingdom", "Germany",
+          "Australia", "Netherlands", "Ireland", "Sweden"
+        ],
+        "label": "Based in a country we sell to"
+      }
+    ]
+  },
+  "intent": {
+    "max": 40,
+    "criteria": [
+      {
+        "id": "requested_demo",
+        "points": 25,
+        "field": "requested_demo",
+        "test": "is_true",
+        "label": "Requested a demo"
+      },
+      {
+        "id": "pricing_page_repeat",
+        "points": 10,
+        "field": "pricing_page_visits",
+        "test": "gte",
+        "value": 2,
+        "label": "Visited pricing page 2+ times"
+      },
+      {
+        "id": "email_engagement",
+        "points": 5,
+        "field": "emails_opened",
+        "test": "gte",
+        "value": 3,
+        "label": "Opened 3+ emails"
+      }
+    ]
+  },
+  "routing": {
+    "book_a_call_at_or_above": 70,
+    "nurture_at_or_above": 40,
+    "below_nurture": "disqualify",
+    "abstain_rule": {
+      "trigger": "any_missing_field_worth_at_least",
+      "points": 20,
+      "note": "Most scoring systems silently treat missing data as zero, which quietly disqualifies good leads whose data simply was not found. Handling it explicitly is the design decision worth defending in an interview."
+    }
+  }
+}
