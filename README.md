@@ -2,6 +2,8 @@
 
 An agentic inbound lead qualifier that reads a new enquiry, decides whether it is worth a salesperson's time, and refuses to guess when the evidence is thin.
 
+Repo: https://github.com/Priyanka5317/inbound-lead-qualifier
+
 Runs on Python 3.11 with **no dependencies and no API key**. Clone it and the evaluation below reproduces.
 
 Three things run against the real world rather than fixtures: **live enrichment** across four keyless sources, **a real Claude call** behind the same validation gate, and **the n8n workflow actually executing**. Each is opt-in; the offline path stays dependency-free so the golden number is reproducible.
